@@ -184,5 +184,33 @@ object SbtMima {
     }
   }
 
+  /** To prevent keeping around lots of old exclude files, this will collect and aggregate files from the x.y.z..*.excludes directories */
+  def collectOldExcludes(filtersDirectory: File, fileExtension: Regex, logger: Logger): Unit = {
+    def findDirs(): Seq[File] = filtersDirectory.listFiles().filter(f => f.isDirectory && fileExtension.findFirstIn(f.getName).isDefined)
+
+    def collectFromDir(dir: File): Unit = {
+      val tmpFile = File.createTempFile("collect", ".tmp", dir.getParentFile)
+
+      val targetFiles = dir.listFiles().filter(_.getName.endsWith(".excludes"))
+      val content =
+      targetFiles
+        .sortBy(_.lastModified())
+        .flatMap { f =>
+          val lines = Source.fromFile(f).getLines().toVector
+          if (lines.nonEmpty)
+            s"# From ${f.getName}" +: lines
+          else Nil
+        }.mkString("\n\n")
+
+      IO.write(tmpFile, content)
+      targetFiles.foreach(_.delete())
+      if (!dir.delete()) dir.renameTo(new File(dir.getParentFile, dir.getName + ".old"))
+
+        tmpFile.renameTo(dir)
+
+    }
+    findDirs().foreach(collectFromDir)
+  }
+
   case class ParsingException(file: File, line: Int, ex: Throwable) extends RuntimeException(s"Error while parsing $file, line $line: ${ex.getMessage}", ex)
 }

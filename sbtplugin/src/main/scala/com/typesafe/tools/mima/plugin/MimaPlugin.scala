@@ -19,6 +19,7 @@ object MimaPlugin extends AutoPlugin {
   def mimaReportSettings: Seq[Setting[_]] = Seq(
     mimaCheckDirection := "backward",
     mimaFiltersDirectory := (sourceDirectory in Compile).value / "mima-filters",
+    mimaCollectOldFilterFiles := SbtMima.collectOldExcludes(mimaFiltersDirectory.value, "\\.(?:backward[s]?|forward[s]?|both)\\.excludes".r, streams.value.log),
     mimaBinaryIssueFilters := Nil,
     mimaBackwardIssueFilters := SbtMima.issueFiltersFromFiles(mimaFiltersDirectory.value, "\\.(?:backward[s]?|both)\\.excludes".r, streams.value),
     mimaForwardIssueFilters := SbtMima.issueFiltersFromFiles(mimaFiltersDirectory.value, "\\.(?:forward[s]?|both)\\.excludes".r, streams.value),

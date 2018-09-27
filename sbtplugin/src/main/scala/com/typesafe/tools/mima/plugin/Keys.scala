@@ -15,6 +15,7 @@ class BaseMimaKeys {
   final val mimaReportBinaryIssues = taskKey[Unit]("Logs all binary incompatibilities to the sbt console/logs.")
 
   final val mimaFiltersDirectory = settingKey[File]("Directory containing issue filters.")
+  final val mimaCollectOldFilterFiles = TaskKey[Unit]("mimaCollectOldFilterFiles", "Collect files in `*.excludes` subdirectories")
 
   final val mimaBinaryIssueFilters   = taskKey[Seq[core.ProblemFilter]]("Filters to apply to binary issues found. Applies both to backward and forward binary compatibility checking.")
   final val mimaBackwardIssueFilters = taskKey[Map[String, Seq[core.ProblemFilter]]]("Filters to apply to binary issues found grouped by version of a module checked against. These filters only apply to backward compatibility checking.")
